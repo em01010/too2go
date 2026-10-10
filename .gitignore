@@ -1,0 +1,36 @@
+# dependencias
+node_modules/
+
+# variables de entorno (nunca se versionan)
+.env
+.env.*
+!.env.example
+
+# builds
+dist/
+build/
+web-build/
+*.tsbuildinfo
+
+# Expo
+.expo/
+expo-env.d.ts
+/apps/mobile/ios
+/apps/mobile/android
+.metro-health-check*
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+supabase/functions/.env
+
+# logs
+*.log
+npm-debug.*
+pnpm-debug.*
+
+# editores / SO
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
