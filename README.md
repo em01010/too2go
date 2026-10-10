@@ -102,6 +102,18 @@ pnpm dev:web                              # http://127.0.0.1:5173
 
 ## 5. App móvil en tu teléfono con Expo Go
 
+### Atajo: un solo comando
+
+```bash
+pnpm dev:phone          # agregá --web para levantar también el panel, --tunnel si el teléfono no ve tu PC
+```
+
+Detecta la IP de tu computadora en la Wi‑Fi, levanta Supabase, aplica migraciones y seed,
+escribe los `.env` de la app y del panel, deja las edge functions corriendo y arranca Metro con
+el QR para Expo Go. Requiere Docker Desktop abierto. En Windows corrélo desde Git Bash o WSL.
+
+### Paso a paso manual
+
 1. Averiguá la IP de tu computadora en la red Wi‑Fi (ej. `192.168.1.10`: `ipconfig` en Windows,
    `ifconfig`/`ip a` en macOS/Linux).
 2. Creá `apps/mobile/.env` a partir de `.env.example` usando **esa IP, no localhost**:

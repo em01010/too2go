@@ -22,7 +22,8 @@
     "functions:serve": "supabase functions serve --env-file supabase/functions/.env",
     "functions:check": "cd supabase/functions && deno check create-payment/index.ts payment-webhook/index.ts mock-checkout/index.ts delete-account/index.ts && deno lint && deno fmt --check",
     "functions:fmt": "cd supabase/functions && deno fmt",
-    "smoke:payments": "./scripts/smoke-payments.sh"
+    "smoke:payments": "./scripts/smoke-payments.sh",
+    "dev:phone": "./scripts/dev-phone.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

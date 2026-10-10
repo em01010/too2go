@@ -26,6 +26,7 @@ supabase/functions/.env
 
 # logs
 *.log
+.dev-*.log
 npm-debug.*
 pnpm-debug.*
 
