@@ -8,6 +8,8 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+    // Una sola copia de React en el monorepo (Expo fija la versión de react en apps/mobile).
+    dedupe: ['react', 'react-dom'],
   },
   server: {
     port: 5173,

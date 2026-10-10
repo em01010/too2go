@@ -434,6 +434,12 @@ export const esHN = {
       vacio: 'No hay liquidaciones.',
     },
   },
+  estadosOferta: {
+    draft: 'Borrador',
+    published: 'Publicada',
+    closed: 'Cerrada',
+    cancelled: 'Cancelada',
+  } as Record<string, string>,
   categorias: {
     panaderia: 'Panadería',
     reposteria: 'Repostería',
