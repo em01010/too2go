@@ -3,6 +3,7 @@ import type {
   CreatePaymentRequest,
   CreatePaymentResponse,
   OfferFeedItem,
+  Merchant,
   Order,
 } from '@too2go/shared';
 
@@ -44,7 +45,111 @@ export const keys = {
   offer: (id: string) => ['offer_feed', id] as const,
   orders: ['order_summaries'] as const,
   order: (id: string) => ['order_summaries', id] as const,
+  favorites: ['favorites'] as const,
+  merchant: (id: string) => ['merchant', id] as const,
+  merchantReviews: (id: string) => ['merchant_reviews', id] as const,
+  impact: ['community_impact'] as const,
 };
+
+export interface MerchantReview {
+  id: string;
+  merchant_id: string;
+  rating: number;
+  comment: string | null;
+  tags: string[];
+  created_at: string;
+  customer_first_name: string;
+}
+
+export interface CommunityImpact {
+  bags_rescued: number;
+  saved_hnl: number;
+  co2e_kg: number;
+  merchants_active: number;
+  customers: number;
+}
+
+/** Ids de comercios favoritos del usuario. */
+export function useFavorites() {
+  const { session } = useAuth();
+  return useQuery({
+    queryKey: keys.favorites,
+    enabled: !!session,
+    queryFn: async (): Promise<Set<string>> => {
+      const { data, error } = await supabase.from('favorites').select('merchant_id');
+      if (error) throw error;
+      return new Set(data.map((f) => f.merchant_id));
+    },
+  });
+}
+
+export function useToggleFavorite() {
+  const qc = useQueryClient();
+  const { session } = useAuth();
+  return useMutation({
+    mutationFn: async (vars: { merchantId: string; isFavorite: boolean }) => {
+      if (vars.isFavorite) {
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('merchant_id', vars.merchantId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ customer_id: session?.user.id ?? '', merchant_id: vars.merchantId });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: keys.favorites }),
+  });
+}
+
+export function useMerchant(id: string | undefined) {
+  return useQuery({
+    queryKey: keys.merchant(id ?? ''),
+    enabled: !!id,
+    queryFn: async (): Promise<Merchant | null> => {
+      const { data, error } = await supabase
+        .from('merchants')
+        .select('*')
+        .eq('id', id ?? '')
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useMerchantReviews(id: string | undefined) {
+  return useQuery({
+    queryKey: keys.merchantReviews(id ?? ''),
+    enabled: !!id,
+    queryFn: async (): Promise<MerchantReview[]> => {
+      const { data, error } = await supabase
+        .from('merchant_reviews')
+        .select('*')
+        .eq('merchant_id', id ?? '')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data as unknown as MerchantReview[];
+    },
+  });
+}
+
+export function useCommunityImpact() {
+  return useQuery({
+    queryKey: keys.impact,
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<CommunityImpact | null> => {
+      const { data, error } = await supabase.rpc('community_impact');
+      if (error) throw error;
+      const row = (data as unknown as CommunityImpact[])[0];
+      return row ?? null;
+    },
+  });
+}
 
 export function useOfferFeed() {
   return useQuery({
@@ -161,6 +266,7 @@ export function useSubmitReview() {
       merchantId: string;
       rating: number;
       comment: string;
+      tags: string[];
     }) => {
       const { error } = await supabase.from('reviews').insert({
         order_id: vars.orderId,
@@ -168,12 +274,15 @@ export function useSubmitReview() {
         customer_id: session?.user.id ?? '',
         rating: vars.rating,
         comment: vars.comment.trim() || null,
+        tags: vars.tags,
       });
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
       void qc.invalidateQueries({ queryKey: keys.order(vars.orderId) });
       void qc.invalidateQueries({ queryKey: keys.orders });
+      void qc.invalidateQueries({ queryKey: keys.merchantReviews(vars.merchantId) });
+      void qc.invalidateQueries({ queryKey: keys.feed });
     },
   });
 }

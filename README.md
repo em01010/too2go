@@ -163,6 +163,21 @@ npx expo login`. En el teléfono: Expo Go → Profile → Log in.
 Para probar que el cron libera reservas vencidas: reservá, no pagués y esperá; a los 10 minutos
 el pedido pasa a _Reserva vencida_ y las bolsas vuelven al inventario.
 
+## Funciones inspiradas en Too Good To Go (adaptadas a Honduras)
+
+- **App**: favoritos con filtro ♥, filtros por categoría y orden (más cerca, más barato, mejor
+  calificado, antes recogida), agotadas al final, perfil del comercio con reseñas y "lo que más
+  destacan", etiquetas dietéticas, instrucciones de recogida, compartir una bolsa, "pedile a alguien
+  que la recoja" por WhatsApp, escribir al comercio, reseñas con etiquetas (variedad, cantidad,
+  calidad, atención, puntualidad), impacto personal y comunitario con CO₂e evitado (2.7 kg por
+  bolsa, metodología de TGTG) y pantalla "Cómo funciona" con preguntas frecuentes.
+- **Panel de comercio**: pausar/reanudar y ajustar cantidad de una bolsa publicada, etiquetas
+  dietéticas al publicar y en plantillas, "Mi comercio" (lo que ven los clientes, incluidas las
+  instrucciones de recogida) y "Reseñas" con promedio y etiquetas.
+- **Admin**: impacto acumulado (bolsas, ahorro de clientes, CO₂e) y etiquetas en reseñas.
+- **Base**: migración `20261010000006_discover_improvements.sql` (columnas nuevas, vista
+  `merchant_reviews`, RPC pública `community_impact`).
+
 ## Comandos útiles
 
 | Comando                | Qué hace                                                         |

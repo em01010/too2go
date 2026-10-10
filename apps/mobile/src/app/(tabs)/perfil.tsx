@@ -1,17 +1,18 @@
 import { formatLempiras, t } from '@too2go/shared';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useMemo } from 'react';
-import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Card, Divider, Label, Muted, Screen, Subtitle, Title } from '@/components/ui';
 import { colors, spacing } from '@/constants/theme';
 import { env } from '@/lib/env';
 import { useAuth } from '@/lib/auth';
-import { useMyOrders } from '@/lib/queries';
+import { useCommunityImpact, useMyOrders } from '@/lib/queries';
 
 export default function Perfil() {
   const { profile, session, signOut } = useAuth();
   const orders = useMyOrders();
+  const community = useCommunityImpact();
 
   const impact = useMemo(() => {
     const picked = (orders.data ?? []).filter((o) => o.status === 'picked_up');
@@ -46,8 +47,33 @@ export default function Perfil() {
             <Text style={styles.big}>{impact.bags}</Text>
             <Muted style={styles.impactMuted}>{t.perfil.bolsasRescatadas}</Muted>
           </View>
+          <View style={styles.flex}>
+            <Text style={styles.big}>{(impact.bags * 2.7).toFixed(1)}</Text>
+            <Muted style={styles.impactMuted}>{t.perfil.co2}</Muted>
+          </View>
         </View>
+        <Muted style={[styles.impactMuted, styles.note]}>{t.perfil.co2Nota}</Muted>
       </Card>
+
+      {community.data ? (
+        <Card style={styles.block}>
+          <Label>{t.perfil.comunidad}</Label>
+          <View style={styles.impactRow}>
+            <View style={styles.flex}>
+              <Subtitle>{community.data.bags_rescued}</Subtitle>
+              <Muted>{t.perfil.bolsasRescatadas}</Muted>
+            </View>
+            <View style={styles.flex}>
+              <Subtitle>{formatLempiras(community.data.saved_hnl)}</Subtitle>
+              <Muted>{t.perfil.ahorrado}</Muted>
+            </View>
+            <View style={styles.flex}>
+              <Subtitle>{community.data.co2e_kg}</Subtitle>
+              <Muted>{t.perfil.co2}</Muted>
+            </View>
+          </View>
+        </Card>
+      ) : null}
 
       <Card style={styles.block}>
         <Label>{t.perfil.nombre}</Label>
@@ -65,6 +91,16 @@ export default function Perfil() {
       </Card>
 
       <View style={styles.actions}>
+        <Button
+          title={t.perfil.comoFunciona}
+          variant="secondary"
+          onPress={() => router.push('/ayuda')}
+        />
+        <Button
+          title={t.perfil.invitar}
+          variant="secondary"
+          onPress={() => void Share.share({ message: t.perfil.invitarTexto })}
+        />
         {whatsapp ? (
           <Button
             title={t.perfil.soporte}
@@ -95,6 +131,7 @@ const styles = StyleSheet.create({
   impact: { marginTop: spacing.md, backgroundColor: colors.primary, borderColor: colors.primary },
   impactLabel: { color: colors.primarySoft },
   impactMuted: { color: colors.primarySoft },
+  note: { marginTop: spacing.sm, fontSize: 12 },
   impactRow: { flexDirection: 'row', marginTop: spacing.sm, gap: spacing.md },
   big: { fontSize: 28, fontWeight: '700', color: '#fff' },
   block: { marginTop: spacing.md },

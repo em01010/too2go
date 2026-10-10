@@ -97,6 +97,21 @@ export const esHN = {
     valorOriginal: 'Valor',
     descuento: (p: number) => `-${p}%`,
     verOferta: 'Ver oferta',
+    filtros: {
+      todas: 'Todas',
+      favoritos: 'Favoritos',
+      sinFavoritos: 'Todavía no tenés favoritos. Tocá el ♥ en un comercio para seguirlo.',
+    },
+    orden: {
+      titulo: 'Ordenar',
+      cercania: 'Más cerca',
+      precio: 'Más barato',
+      calificacion: 'Mejor calificado',
+      horario: 'Antes recogida',
+    },
+    impacto: (bolsas: number, lempiras: string) =>
+      `Tegucigalpa ya rescató ${bolsas} ${bolsas === 1 ? 'bolsa' : 'bolsas'} y ahorró ${lempiras}`,
+    agotadosAbajo: 'Agotadas por hoy',
   },
   oferta: {
     titulo: 'Bolsa sorpresa',
@@ -116,6 +131,19 @@ export const esHN = {
     estacionamiento: 'Tiene estacionamiento',
     resenas: (n: number) => (n === 1 ? '1 reseña' : `${n} reseñas`),
     sinResenas: 'Sin reseñas todavía',
+    instruccionesRecogida: 'Cómo recoger',
+    verComercio: 'Ver comercio',
+    compartir: 'Compartir',
+    compartirTexto: (title: string, merchant: string, price: string) =>
+      `Mirá esta ${title} de ${merchant} por ${price} en Too2Go. ¡Rescatá comida rica a mitad de precio!`,
+    favorito: 'Guardar en favoritos',
+    favoritoQuitar: 'Quitar de favoritos',
+    dietas: {
+      vegetariano: 'Vegetariano',
+      vegano: 'Vegano',
+      sin_gluten: 'Sin gluten',
+      sin_lactosa: 'Sin lactosa',
+    } as Record<string, string>,
     errores: {
       sold_out: 'Se acabaron justo ahora. Probá con otra bolsa.',
       offer_expired: 'La franja de recogida ya pasó.',
@@ -157,7 +185,19 @@ export const esHN = {
     noSePudoCancelar: 'Ya no se puede cancelar este pedido.',
     dejarResena: 'Dejar reseña',
     resenaTitulo: '¿Cómo estuvo tu bolsa?',
+    resenaQueDestacas: '¿Qué destacás?',
     resenaComentario: 'Contanos un poco (opcional)',
+    resenaTags: {
+      variedad: 'Variedad',
+      cantidad: 'Cantidad',
+      calidad: 'Calidad',
+      atencion: 'Buena atención',
+      puntualidad: 'Puntualidad',
+    } as Record<string, string>,
+    pedirAmigo: 'Pedile a alguien que la recoja',
+    pedirAmigoTexto: (merchant: string, franja: string, code: string, address: string) =>
+      `¿Me recogés mi bolsa de Too2Go? Es en ${merchant} (${address}), entre ${franja}. Mostrá este código al retirar: ${code}`,
+    escribirComercio: 'Escribir al comercio',
     resenaEnviar: 'Enviar reseña',
     resenaGracias: '¡Gracias por tu reseña!',
     ayuda: 'Necesito ayuda',
@@ -191,6 +231,13 @@ export const esHN = {
     ahorroTitulo: 'Tu impacto',
     ahorrado: 'Ahorrado',
     bolsasRescatadas: 'Bolsas rescatadas',
+    co2: 'kg de CO₂e evitados',
+    co2Nota: 'Estimado: cada bolsa rescatada evita unos 2.7 kg de CO₂e.',
+    comunidad: 'Impacto de la comunidad',
+    comoFunciona: 'Cómo funciona Too2Go',
+    invitar: 'Invitar amigos',
+    invitarTexto:
+      'Estoy usando Too2Go para rescatar comida rica a mitad de precio en Tegucigalpa. ¡Probala!',
     nombre: 'Nombre',
     telefono: 'Teléfono',
     soporte: 'Soporte por WhatsApp',
@@ -200,6 +247,69 @@ export const esHN = {
     eliminarCuenta: 'Eliminar mi cuenta',
     sinNombre: 'Sin nombre',
     editarNombre: 'Cambiar nombre',
+  },
+  comercio: {
+    titulo: 'Comercio',
+    bolsasHoy: 'Bolsas de hoy',
+    sinBolsasHoy: 'Hoy no tiene bolsas publicadas. Guardalo en favoritos para no perdértelo.',
+    resenas: 'Reseñas',
+    sinResenas: 'Todavía nadie dejó reseña.',
+    destacan: 'Lo que más destacan',
+    direccion: 'Dirección',
+    instrucciones: 'Cómo recoger',
+    escribir: 'Escribir por WhatsApp',
+  },
+  ayuda: {
+    titulo: 'Cómo funciona',
+    pasos: [
+      {
+        titulo: '1. Buscá una bolsa cerca',
+        texto:
+          'Panaderías, cafés, comedores y tiendas publican lo que les sobra del día como "bolsas sorpresa" a menos de la mitad de su valor.',
+      },
+      {
+        titulo: '2. Reservá y pagá en la app',
+        texto:
+          'Tenés 10 minutos para pagar. Si no, la bolsa vuelve a estar disponible para otra persona.',
+      },
+      {
+        titulo: '3. Recogé en la franja indicada',
+        texto:
+          'Mostrá tu código o QR en el local. Si no podés ir, compartí el código con alguien de confianza para que la recoja.',
+      },
+      {
+        titulo: '4. Calificá y seguí rescatando',
+        texto: 'Tu reseña ayuda a otros clientes y al comercio a mejorar.',
+      },
+    ],
+    faqTitulo: 'Preguntas frecuentes',
+    faq: [
+      {
+        p: '¿Qué trae la bolsa?',
+        r: 'Es sorpresa: depende de lo que le sobró al comercio ese día. El valor siempre supera lo que pagás. Si tenés alergias, revisá la nota del comercio antes de reservar.',
+      },
+      {
+        p: '¿Puedo cancelar?',
+        r: 'Sí, hasta 2 horas antes del inicio de la franja de recogida. Después de eso no hay reembolso.',
+      },
+      {
+        p: '¿Qué pasa si no paso a recoger?',
+        r: 'La bolsa se pierde y no hay reembolso, porque el comercio ya la apartó para vos. Si no podés ir, pedile a alguien que la recoja con tu código.',
+      },
+      {
+        p: '¿Y si el comercio no tuvo sobrante?',
+        r: 'El comercio cancela la bolsa y te devolvemos el dinero completo.',
+      },
+      {
+        p: '¿Cómo pago?',
+        r: 'En línea, desde la app. Pronto vamos a agregar más opciones de pago.',
+      },
+      {
+        p: '¿Necesito llevar bolsa?',
+        r: 'Si podés, traé tu propia bolsa o recipiente. Así ahorramos empaques.',
+      },
+    ],
+    contacto: 'Hablar con soporte por WhatsApp',
   },
   eliminarCuenta: {
     titulo: 'Eliminar cuenta',
@@ -224,6 +334,8 @@ export const esHN = {
       plantillas: 'Plantillas',
       cierre: 'Cierre de sobrante',
       ventas: 'Ventas y liquidaciones',
+      resenas: 'Reseñas',
+      miComercio: 'Mi comercio',
     },
     sinComercio: 'Tu cuenta no está asociada a ningún comercio. Escribile a soporte.',
     comercioPendiente: 'Tu comercio está pendiente de aprobación.',
@@ -293,6 +405,13 @@ export const esHN = {
       estado: 'Estado',
       cantidad: 'Cant.',
       total: 'Total',
+      pausar: 'Pausar',
+      reanudar: 'Reanudar',
+      pausada: 'Pausada (no se muestra a clientes)',
+      masBolsas: 'Agregar 1 bolsa',
+      menosBolsas: 'Quitar 1 bolsa',
+      cantidadActualizada: 'Cantidad actualizada.',
+      noMenosQueReservadas: 'No podés bajar de las bolsas ya reservadas.',
     },
     validar: {
       titulo: 'Validar código',
@@ -322,6 +441,7 @@ export const esHN = {
       descripcion: 'Descripción',
       categoria: 'Categoría',
       alergenos: 'Nota de alérgenos',
+      dietas: 'Apto para',
       precio: 'Precio (L)',
       valorOriginal: 'Valor original (L)',
       cantidad: 'Cantidad de bolsas',
@@ -386,6 +506,22 @@ export const esHN = {
       comisionNota: (pct: string) => `Tu comisión actual es ${pct}.`,
     },
   },
+  miComercio: {
+    titulo: 'Mi comercio',
+    texto:
+      'Esto es lo que ven los clientes en la app. Comisión y datos fiscales los administra Too2Go.',
+    guardado: 'Datos guardados.',
+    instrucciones: 'Instrucciones de recogida (las ve el cliente al pagar)',
+    instruccionesPlaceholder: 'Ej. Pasá a la caja y mostrá tu código. Hay parqueo atrás.',
+    calificacion: 'Calificación',
+  },
+  panelResenas: {
+    titulo: 'Reseñas',
+    promedio: 'Promedio',
+    total: 'Reseñas',
+    destacan: 'Lo que más destacan',
+    vacio: 'Todavía no tenés reseñas. Llegan cuando un cliente recoge su bolsa.',
+  },
   // ---------------------------------------------------------------------
   // Panel admin
   // ---------------------------------------------------------------------
@@ -411,6 +547,10 @@ export const esHN = {
       noShow30: 'No recogidas (30 días)',
       sobrante30: 'Bolsas sin vender (30 días)',
       ultimos7: 'Últimos 7 días',
+      impacto: 'Impacto acumulado',
+      bolsasRescatadas: 'Bolsas rescatadas',
+      ahorroClientes: 'Ahorro de clientes',
+      co2: 'kg CO₂e evitados',
     },
     comercios: {
       titulo: 'Comercios',

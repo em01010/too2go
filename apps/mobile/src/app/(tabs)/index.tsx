@@ -5,30 +5,66 @@ import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 
+import { Chips } from '@/components/Chips';
 import { OfferCard } from '@/components/OfferCard';
-import { Button, Empty, Loading, Muted, Screen, Title } from '@/components/ui';
+import { Button, Empty, Label, Loading, Muted, Screen, Title } from '@/components/ui';
 import { colors, radius, spacing } from '@/constants/theme';
 import { distanceMeters, TEGUCIGALPA, useUserLocation } from '@/lib/location';
-import { useOfferFeed } from '@/lib/queries';
+import { useCommunityImpact, useFavorites, useOfferFeed } from '@/lib/queries';
 
 type Mode = 'list' | 'map';
+type Sort = 'cercania' | 'precio' | 'calificacion' | 'horario';
+
+const SORTS: Sort[] = ['cercania', 'precio', 'calificacion', 'horario'];
 
 export default function Descubrir() {
   const [mode, setMode] = useState<Mode>('list');
+  const [filter, setFilter] = useState('todas');
+  const [sort, setSort] = useState<Sort>('cercania');
   const feed = useOfferFeed();
+  const favorites = useFavorites();
+  const impact = useCommunityImpact();
   const { coords, denied, request } = useUserLocation();
 
+  const categories = useMemo(() => {
+    const set = new Set((feed.data ?? []).map((o) => o.category ?? 'otro'));
+    return [
+      { key: 'todas', label: t.descubrir.filtros.todas },
+      { key: 'favoritos', label: `♥ ${t.descubrir.filtros.favoritos}` },
+      ...[...set].map((c) => ({ key: c, label: t.categorias[c] ?? c })),
+    ];
+  }, [feed.data]);
+
   const items = useMemo(() => {
-    const list = (feed.data ?? []).map((o) => ({
+    let list = (feed.data ?? []).map((o) => ({
       offer: o,
       distance:
         coords && o.lat != null && o.lng != null
           ? distanceMeters(coords, { lat: o.lat, lng: o.lng })
           : null,
     }));
-    if (coords) list.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+    if (filter === 'favoritos') {
+      list = list.filter((i) => favorites.data?.has(i.offer.merchant_id ?? ''));
+    } else if (filter !== 'todas') {
+      list = list.filter((i) => i.offer.category === filter);
+    }
+    const avail = (i: (typeof list)[number]) => (i.offer.quantity_available ?? 0) > 0;
+    list.sort((a, b) => {
+      // Agotadas siempre al final
+      if (avail(a) !== avail(b)) return avail(a) ? -1 : 1;
+      switch (sort) {
+        case 'precio':
+          return Number(a.offer.price_hnl ?? 0) - Number(b.offer.price_hnl ?? 0);
+        case 'calificacion':
+          return Number(b.offer.rating_avg ?? 0) - Number(a.offer.rating_avg ?? 0);
+        case 'horario':
+          return (a.offer.pickup_start ?? '').localeCompare(b.offer.pickup_start ?? '');
+        default:
+          return (a.distance ?? Infinity) - (b.distance ?? Infinity);
+      }
+    });
     return list;
-  }, [feed.data, coords]);
+  }, [feed.data, coords, filter, sort, favorites.data]);
 
   return (
     <Screen scroll={false} padded={false}>
@@ -48,6 +84,24 @@ export default function Descubrir() {
           ))}
         </View>
       </View>
+
+      {impact.data && impact.data.bags_rescued > 0 ? (
+        <Muted style={styles.impact}>
+          🌱 {t.descubrir.impacto(impact.data.bags_rescued, formatLempiras(impact.data.saved_hnl))}
+        </Muted>
+      ) : null}
+
+      <Chips options={categories} value={filter} onChange={setFilter} />
+      {mode === 'list' ? (
+        <View style={styles.sortRow}>
+          <Label>{t.descubrir.orden.titulo}</Label>
+          <Chips
+            options={SORTS.map((s) => ({ key: s, label: t.descubrir.orden[s] }))}
+            value={sort}
+            onChange={(k) => setSort(k as Sort)}
+          />
+        </View>
+      ) : null}
 
       {denied ? (
         <View style={styles.banner}>
@@ -74,11 +128,15 @@ export default function Descubrir() {
           contentContainerStyle={styles.list}
           refreshing={feed.isRefetching}
           onRefresh={() => void feed.refetch()}
-          ListEmptyComponent={<Empty title={t.descubrir.vacio} />}
+          ListEmptyComponent={
+            <Empty
+              title={filter === 'favoritos' ? t.descubrir.filtros.sinFavoritos : t.descubrir.vacio}
+            />
+          }
           renderItem={({ item }) => <OfferCard offer={item.offer} distanceMeters={item.distance} />}
         />
       ) : (
-        <OffersMap offers={feed.data ?? []} center={coords ?? TEGUCIGALPA} />
+        <OffersMap offers={items.map((i) => i.offer)} center={coords ?? TEGUCIGALPA} />
       )}
     </Screen>
   );
@@ -109,7 +167,7 @@ function OffersMap({
             coordinate={{ latitude: o.lat, longitude: o.lng }}
             title={o.merchant_name ?? ''}
             description={`${formatLempiras(o.price_hnl)} · ${t.descubrir.quedan(o.quantity_available ?? 0)}`}
-            pinColor={colors.primary}
+            pinColor={(o.quantity_available ?? 0) > 0 ? colors.primary : colors.textMuted}
             onCalloutPress={() =>
               router.push({ pathname: '/oferta/[id]', params: { id: o.id ?? '' } })
             }
@@ -125,11 +183,13 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.xs,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  impact: { paddingHorizontal: spacing.md, paddingBottom: spacing.xs, color: colors.primaryDark },
+  sortRow: { marginTop: spacing.xs, paddingLeft: spacing.md },
   toggle: {
     flexDirection: 'row',
     backgroundColor: colors.border,
@@ -142,7 +202,7 @@ const styles = StyleSheet.create({
   toggleTextActive: { color: colors.primaryDark },
   banner: {
     marginHorizontal: spacing.md,
-    marginBottom: spacing.sm,
+    marginVertical: spacing.sm,
     padding: spacing.sm,
     borderRadius: radius.md,
     backgroundColor: colors.accentSoft,
@@ -150,5 +210,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  list: { paddingHorizontal: spacing.md, paddingBottom: spacing.xl, flexGrow: 1 },
+  list: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xl,
+    flexGrow: 1,
+  },
 });

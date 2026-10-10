@@ -32,8 +32,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [sessionLoading, setSessionLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
 
-  const load = useCallback(async (userId: string) => {
-    setProfileLoading(true);
+  const load = useCallback(async (userId: string, opts: { silent?: boolean } = {}) => {
+    if (!opts.silent) setProfileLoading(true);
     const [{ data: p }, { data: m }] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
       supabase.from('merchant_members').select('merchants(*)').eq('user_id', userId),
@@ -88,7 +88,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         window.history.replaceState(null, '', '/');
       },
       async reload() {
-        if (session) await load(session.user.id);
+        // Silencioso: no muestra "Cargando…" global (eso desmontaría la pantalla actual).
+        if (session) await load(session.user.id, { silent: true });
       },
     }),
     [session, profile, merchants, merchantId, sessionLoading, profileLoading, load],

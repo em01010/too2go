@@ -91,6 +91,7 @@ export type Database = {
           lng: number;
           logo_url: string | null;
           name: string;
+          pickup_instructions: string | null;
           rtn: string | null;
           status: Database['public']['Enums']['merchant_status'];
           updated_at: string;
@@ -114,6 +115,7 @@ export type Database = {
           lng: number;
           logo_url?: string | null;
           name: string;
+          pickup_instructions?: string | null;
           rtn?: string | null;
           status?: Database['public']['Enums']['merchant_status'];
           updated_at?: string;
@@ -136,6 +138,7 @@ export type Database = {
           lng?: number;
           logo_url?: string | null;
           name?: string;
+          pickup_instructions?: string | null;
           rtn?: string | null;
           status?: Database['public']['Enums']['merchant_status'];
           updated_at?: string;
@@ -150,6 +153,7 @@ export type Database = {
           category: Database['public']['Enums']['food_category'];
           created_at: string;
           description: string | null;
+          dietary_tags: string[];
           id: string;
           merchant_id: string;
           original_value_hnl: number;
@@ -166,6 +170,7 @@ export type Database = {
           category: Database['public']['Enums']['food_category'];
           created_at?: string;
           description?: string | null;
+          dietary_tags?: string[];
           id?: string;
           merchant_id: string;
           original_value_hnl: number;
@@ -181,6 +186,7 @@ export type Database = {
           category?: Database['public']['Enums']['food_category'];
           created_at?: string;
           description?: string | null;
+          dietary_tags?: string[];
           id?: string;
           merchant_id?: string;
           original_value_hnl?: number;
@@ -208,6 +214,7 @@ export type Database = {
           closed_at: string | null;
           created_at: string;
           description: string | null;
+          dietary_tags: string[];
           id: string;
           leftover_disposition: Database['public']['Enums']['leftover_disposition'];
           merchant_id: string;
@@ -230,6 +237,7 @@ export type Database = {
           closed_at?: string | null;
           created_at?: string;
           description?: string | null;
+          dietary_tags?: string[];
           id?: string;
           leftover_disposition?: Database['public']['Enums']['leftover_disposition'];
           merchant_id: string;
@@ -251,6 +259,7 @@ export type Database = {
           closed_at?: string | null;
           created_at?: string;
           description?: string | null;
+          dietary_tags?: string[];
           id?: string;
           leftover_disposition?: Database['public']['Enums']['leftover_disposition'];
           merchant_id?: string;
@@ -564,6 +573,7 @@ export type Database = {
           merchant_id: string;
           order_id: string;
           rating: number;
+          tags: string[];
         };
         ComputedFields: never;
         Insert: {
@@ -575,6 +585,7 @@ export type Database = {
           merchant_id: string;
           order_id: string;
           rating: number;
+          tags?: string[];
         };
         Update: {
           comment?: string | null;
@@ -585,6 +596,7 @@ export type Database = {
           merchant_id?: string;
           order_id?: string;
           rating?: number;
+          tags?: string[];
         };
         Relationships: [
           {
@@ -619,6 +631,27 @@ export type Database = {
       };
     };
     Views: {
+      merchant_reviews: {
+        Row: {
+          comment: string | null;
+          created_at: string | null;
+          customer_first_name: string | null;
+          id: string | null;
+          merchant_id: string | null;
+          rating: number | null;
+          tags: string[] | null;
+        };
+        ComputedFields: never;
+        Relationships: [
+          {
+            foreignKeyName: 'reviews_merchant_id_fkey';
+            columns: ['merchant_id'];
+            isOneToOne: false;
+            referencedRelation: 'merchants';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       offer_feed: {
         Row: {
           address: string | null;
@@ -626,18 +659,24 @@ export type Database = {
           category: Database['public']['Enums']['food_category'] | null;
           cover_url: string | null;
           description: string | null;
+          dietary_tags: string[] | null;
           has_parking: boolean | null;
           id: string | null;
           lat: number | null;
           lng: number | null;
           logo_url: string | null;
+          merchant_category: Database['public']['Enums']['food_category'] | null;
+          merchant_description: string | null;
           merchant_id: string | null;
           merchant_name: string | null;
+          merchant_whatsapp: string | null;
           original_value_hnl: number | null;
           pickup_end: string | null;
+          pickup_instructions: string | null;
           pickup_start: string | null;
           price_hnl: number | null;
           quantity_available: number | null;
+          quantity_total: number | null;
           rating_avg: number | null;
           rating_count: number | null;
           title: string | null;
@@ -783,6 +822,16 @@ export type Database = {
         };
       };
       close_expired_offers: { Args: Record<PropertyKey, never>; Returns: number };
+      community_impact: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          bags_rescued: number;
+          co2e_kg: number;
+          customers: number;
+          merchants_active: number;
+          saved_hnl: number;
+        }[];
+      };
       confirm_payment: {
         Args: { p_order: string; p_provider: string; p_ref: string };
         Returns: {
@@ -882,6 +931,7 @@ export type Database = {
           lng: number;
           logo_url: string | null;
           name: string;
+          pickup_instructions: string | null;
           rtn: string | null;
           status: Database['public']['Enums']['merchant_status'];
           updated_at: string;

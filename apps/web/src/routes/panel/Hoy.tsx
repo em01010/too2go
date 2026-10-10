@@ -78,6 +78,41 @@ function OfferBlock({ offer, orders }: { offer: Offer; orders: OrderSummary[] })
   const [error, setError] = useState('');
   const available = offer.quantity_total - offer.quantity_reserved;
 
+  const invalidate = () => {
+    void qc.invalidateQueries({ queryKey: ['offers'] });
+    void qc.invalidateQueries({ queryKey: ['orders'] });
+  };
+
+  const pause = useMutation({
+    mutationFn: async () => {
+      const { error: err } = await supabase
+        .from('offers')
+        .update({ status: offer.status === 'published' ? 'draft' : 'published' })
+        .eq('id', offer.id);
+      if (err) throw err;
+    },
+    onSuccess: invalidate,
+    onError: () => setError(t.comun.errorGenerico),
+  });
+
+  const adjust = useMutation({
+    mutationFn: async (delta: number) => {
+      const next = offer.quantity_total + delta;
+      if (next < Math.max(1, offer.quantity_reserved)) throw new Error('min');
+      const { error: err } = await supabase
+        .from('offers')
+        .update({ quantity_total: next })
+        .eq('id', offer.id);
+      if (err) throw err;
+    },
+    onSuccess: () => {
+      invalidate();
+      show(t.panel.hoy.cantidadActualizada);
+    },
+    onError: (e) =>
+      setError(e.message === 'min' ? t.panel.hoy.noMenosQueReservadas : t.comun.errorGenerico),
+  });
+
   const cancel = useMutation({
     mutationFn: async () => {
       const { error: err } = await supabase.rpc('cancel_offer_by_merchant', {
@@ -113,6 +148,33 @@ function OfferBlock({ offer, orders }: { offer: Offer; orders: OrderSummary[] })
           >
             {t.estadosOferta[offer.status] ?? offer.status}
           </span>
+          {offer.status === 'published' || offer.status === 'draft' ? (
+            <>
+              <button
+                className="btn sm secondary"
+                title={t.panel.hoy.menosBolsas}
+                disabled={adjust.isPending}
+                onClick={() => adjust.mutate(-1)}
+              >
+                −1
+              </button>
+              <button
+                className="btn sm secondary"
+                title={t.panel.hoy.masBolsas}
+                disabled={adjust.isPending}
+                onClick={() => adjust.mutate(1)}
+              >
+                +1
+              </button>
+              <button
+                className="btn sm ghost"
+                disabled={pause.isPending}
+                onClick={() => pause.mutate()}
+              >
+                {offer.status === 'published' ? t.panel.hoy.pausar : t.panel.hoy.reanudar}
+              </button>
+            </>
+          ) : null}
           {offer.status === 'published' ? (
             <button className="btn sm ghost" onClick={() => setConfirming((c) => !c)}>
               {t.panel.hoy.cancelarOferta}
@@ -120,6 +182,8 @@ function OfferBlock({ offer, orders }: { offer: Offer; orders: OrderSummary[] })
           ) : null}
         </div>
       </div>
+      {offer.status === 'draft' ? <p className="muted small">{t.panel.hoy.pausada}</p> : null}
+      {!confirming ? <ErrorMsg>{error}</ErrorMsg> : null}
       {confirming ? (
         <div
           className="card pad-sm mt"

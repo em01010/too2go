@@ -1,4 +1,5 @@
 import { formatLempiras, t } from '@too2go/shared';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { Loading, Page, Stat } from '@/components/ui';
@@ -9,6 +10,7 @@ import {
   useAdminOrders,
 } from '@/lib/adminQueries';
 import { fechaCortaHN, hoyHN, rangoDiaHN, sumarDias } from '@/lib/dates';
+import { supabase } from '@/lib/supabase';
 
 const PAGADOS = new Set(['paid', 'picked_up', 'no_show']);
 
@@ -19,6 +21,17 @@ export function AdminMetricas() {
   const offers = useAdminOffers(hace30);
   const merchants = useAdminMerchants();
   const customers = useAdminCustomerCount();
+  const impact = useQuery({
+    queryKey: ['community_impact'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('community_impact');
+      if (error) throw error;
+      return (
+        (data as unknown as { bags_rescued: number; saved_hnl: number; co2e_kg: number }[])[0] ??
+        null
+      );
+    },
+  });
 
   const m = useMemo(() => {
     const os = orders.data ?? [];
@@ -74,6 +87,23 @@ export function AdminMetricas() {
         <Stat label={t.admin.metricas.noShow30} value={m.noShow30} />
         <Stat label={t.admin.metricas.sobrante30} value={m.sobrante30} />
       </div>
+      {impact.data ? (
+        <>
+          <h2>{t.admin.metricas.impacto}</h2>
+          <div className="grid mb">
+            <Stat
+              label={t.admin.metricas.bolsasRescatadas}
+              value={impact.data.bags_rescued}
+              tone="primary"
+            />
+            <Stat
+              label={t.admin.metricas.ahorroClientes}
+              value={formatLempiras(impact.data.saved_hnl)}
+            />
+            <Stat label={t.admin.metricas.co2} value={impact.data.co2e_kg} />
+          </div>
+        </>
+      ) : null}
       <div className="card">
         <h2>{t.admin.metricas.ultimos7}</h2>
         <p className="muted">{t.admin.metricas.pedidosHoy}</p>

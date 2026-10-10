@@ -31,6 +31,11 @@ export function AdminResenas() {
               <span className="muted small">
                 {r.profiles?.full_name ?? '—'} · {fechaHoraHN(r.created_at)}
               </span>
+              {r.tags.map((tag) => (
+                <span key={tag} className="pill">
+                  {t.pedido.resenaTags[tag] ?? tag}
+                </span>
+              ))}
               {r.hidden ? <span className="pill danger">{t.admin.resenas.oculta}</span> : null}
             </div>
             <p style={{ marginTop: 6, marginBottom: 0 }}>

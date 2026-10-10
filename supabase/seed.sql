@@ -55,17 +55,20 @@ update public.profiles set role = 'merchant' where id in (
 -- ---------------------------------------------------------------------
 -- Comercios activos en Tegucigalpa (coordenadas aproximadas reales)
 -- ---------------------------------------------------------------------
-insert into public.merchants (id, name, legal_name, rtn, category, description, address, city, zone, lat, lng, whatsapp, has_parking, commission_rate, status)
+insert into public.merchants (id, name, legal_name, rtn, category, description, address, city, zone, lat, lng, whatsapp, has_parking, commission_rate, status, pickup_instructions)
 values
   ('11111111-0000-4000-8000-000000000001', 'Panadería La Palmira', 'Panificadora La Palmira S. de R.L.', '08019995123456',
    'panaderia', 'Pan artesanal, semitas y repostería del día. Lo que no se vende por la tarde va en la bolsa sorpresa.',
-   'Av. República de Chile, frente al parque, Col. Palmira', 'Tegucigalpa', 'Palmira', 14.0968, -87.1947, '+50499001001', false, 0.25, 'active'),
+   'Av. República de Chile, frente al parque, Col. Palmira', 'Tegucigalpa', 'Palmira', 14.0968, -87.1947, '+50499001001', false, 0.25, 'active',
+   'Pasá a la caja y mostrá tu código. Si venís en moto podés parquear frente a la entrada.'),
   ('11111111-0000-4000-8000-000000000002', 'Café Los Próceres', 'Cafés de Altura S.A.', '08019995654321',
    'cafeteria', 'Café de Marcala, sándwiches y pasteles. Bolsa sorpresa con lo que quedó del mostrador.',
-   'Blvd. Los Próceres, contiguo a gasolinera, Col. Lomas del Guijarro', 'Tegucigalpa', 'Los Próceres', 14.0893, -87.1872, '+50499001002', true, 0.25, 'active'),
+   'Blvd. Los Próceres, contiguo a gasolinera, Col. Lomas del Guijarro', 'Tegucigalpa', 'Los Próceres', 14.0893, -87.1872, '+50499001002', true, 0.25, 'active',
+   'Preguntá por la bolsa de Too2Go en la barra. Hay parqueo atrás del local.'),
   ('11111111-0000-4000-8000-000000000003', 'Tienda Express Morazán', 'Inversiones Morazán S. de R.L.', '08019995789012',
    'conveniencia', 'Tienda de conveniencia 24/7. Bolsa con lácteos, frutas y snacks próximos a vencer en buen estado.',
-   'Blvd. Morazán, plaza comercial frente a Hospital Honduras Medical Center', 'Tegucigalpa', 'Blvd. Morazán', 14.0953, -87.1816, '+50499001003', true, 0.20, 'active');
+   'Blvd. Morazán, plaza comercial frente a Hospital Honduras Medical Center', 'Tegucigalpa', 'Blvd. Morazán', 14.0953, -87.1816, '+50499001003', true, 0.20, 'active',
+   'Mostrá el código en cualquier caja. Traé tu propia bolsa si podés.');
 
 insert into public.merchant_members (merchant_id, user_id, role) values
   ('11111111-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'owner'),
@@ -75,17 +78,17 @@ insert into public.merchant_members (merchant_id, user_id, role) values
 -- ---------------------------------------------------------------------
 -- Plantillas recurrentes (las usa el cron diario y la pantalla Plantillas)
 -- ---------------------------------------------------------------------
-insert into public.offer_templates (id, merchant_id, title, description, category, price_hnl, original_value_hnl, quantity, weekdays, pickup_start_local, pickup_end_local)
+insert into public.offer_templates (id, merchant_id, title, description, category, price_hnl, original_value_hnl, quantity, weekdays, pickup_start_local, pickup_end_local, dietary_tags)
 values
   ('33333333-0000-4000-8000-000000000001', '11111111-0000-4000-8000-000000000001', 'Bolsa de pan del día',
    'Mezcla de pan dulce, semitas y pan de molde. Puede contener gluten, lácteos y huevo.',
-   'panaderia', 90, 250, 5, '{1,2,3,4,5,6}', '17:00', '18:00'),
+   'panaderia', 90, 250, 5, '{1,2,3,4,5,6}', '17:00', '18:00', '{vegetariano}'),
   ('33333333-0000-4000-8000-000000000002', '11111111-0000-4000-8000-000000000002', 'Bolsa de cafetería',
    'Sándwiches, croissants y una porción de pastel. Puede contener gluten, lácteos y frutos secos.',
-   'cafeteria', 120, 320, 4, '{1,2,3,4,5}', '16:30', '17:30'),
+   'cafeteria', 120, 320, 4, '{1,2,3,4,5}', '16:30', '17:30', '{}'),
   ('33333333-0000-4000-8000-000000000003', '11111111-0000-4000-8000-000000000003', 'Bolsa de conveniencia',
    'Lácteos, frutas y snacks cerca de su fecha de vencimiento, en buen estado.',
-   'conveniencia', 75, 200, 6, '{0,1,2,3,4,5,6}', '20:00', '21:30');
+   'conveniencia', 75, 200, 6, '{0,1,2,3,4,5,6}', '20:00', '21:30', '{vegetariano}');
 
 -- ---------------------------------------------------------------------
 -- Ofertas para HOY. Si la hora local ya pasó, la franja se corre para que
@@ -103,6 +106,7 @@ begin
   values ('22222222-0000-4000-8000-000000000001', '11111111-0000-4000-8000-000000000001', '33333333-0000-4000-8000-000000000001',
           'Bolsa de pan del día', 'Mezcla de pan dulce, semitas y pan de molde recién horneado hoy.',
           'panaderia', 'Puede contener gluten, lácteos y huevo.', 90, 250, 5, v_start, v_start + interval '1 hour');
+  update public.offers set dietary_tags = '{vegetariano}' where id = '22222222-0000-4000-8000-000000000001';
 
   -- Café Los Próceres: 4 bolsas, 4:30–5:30 pm
   v_start := greatest((v_today + time '16:30') at time zone 'America/Tegucigalpa', v_min);
@@ -117,6 +121,7 @@ begin
   values ('22222222-0000-4000-8000-000000000003', '11111111-0000-4000-8000-000000000003', '33333333-0000-4000-8000-000000000003',
           'Bolsa de conveniencia', 'Lácteos, frutas y snacks cerca de su fecha de vencimiento, en buen estado.',
           'conveniencia', 'Revisá las etiquetas de cada producto.', 75, 200, 6, v_start, v_start + interval '90 minutes');
+  update public.offers set dietary_tags = '{vegetariano,sin_gluten}' where id = '22222222-0000-4000-8000-000000000003';
 end $$;
 
 -- ---------------------------------------------------------------------
@@ -141,9 +146,9 @@ begin
           2, 90, 180, 0.25, 45, 135, 'picked_up', '482913', 'mock', 'MOCK-SEED-0001',
           v_start - interval '3 hours', v_start + interval '20 minutes', v_start - interval '3 hours');
 
-  insert into public.reviews (order_id, merchant_id, customer_id, rating, comment)
+  insert into public.reviews (order_id, merchant_id, customer_id, rating, comment, tags)
   values (v_order_id, '11111111-0000-4000-8000-000000000001', 'c0000000-0000-4000-8000-000000000001', 5,
-          'Riquísimo el pan y súper buena onda la atención. Volvemos seguro.');
+          'Riquísimo el pan y súper buena onda la atención. Volvemos seguro.', '{variedad,cantidad,atencion}');
 end $$;
 
 insert into public.favorites (customer_id, merchant_id) values

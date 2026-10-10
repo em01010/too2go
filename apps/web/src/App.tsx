@@ -17,6 +17,8 @@ import { RegistroComercio } from '@/routes/RegistroComercio';
 import { Pendiente } from '@/routes/panel/Pendiente';
 import { Cierre } from '@/routes/panel/Cierre';
 import { Hoy } from '@/routes/panel/Hoy';
+import { MiComercio } from '@/routes/panel/MiComercio';
+import { Resenas } from '@/routes/panel/Resenas';
 import { Plantillas } from '@/routes/panel/Plantillas';
 import { Publicar } from '@/routes/panel/Publicar';
 import { Validar } from '@/routes/panel/Validar';
@@ -45,6 +47,8 @@ const panelNav = [
   { to: '/panel/plantillas', label: t.panel.nav.plantillas },
   { to: '/panel/cierre', label: t.panel.nav.cierre },
   { to: '/panel/ventas', label: t.panel.nav.ventas },
+  { to: '/panel/resenas', label: t.panel.nav.resenas },
+  { to: '/panel/mi-comercio', label: t.panel.nav.miComercio },
 ];
 
 const adminNav = [
@@ -122,6 +126,22 @@ function Router() {
           element={
             <Guard ok={merchants.length > 0} to="/admin">
               <Ventas />
+            </Guard>
+          }
+        />
+        <Route
+          path="/panel/resenas"
+          element={
+            <Guard ok={merchants.length > 0} to="/admin">
+              <Resenas />
+            </Guard>
+          }
+        />
+        <Route
+          path="/panel/mi-comercio"
+          element={
+            <Guard ok={merchants.length > 0} to="/admin">
+              <MiComercio key={merchants[0]?.id ?? ''} />
             </Guard>
           }
         />

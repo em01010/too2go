@@ -53,6 +53,8 @@ function RootNavigator() {
         <Stack.Screen name="oferta/[id]" />
         <Stack.Screen name="checkout/[orderId]" options={{ gestureEnabled: false }} />
         <Stack.Screen name="pedido/[id]" />
+        <Stack.Screen name="comercio/[id]" />
+        <Stack.Screen name="ayuda" />
         <Stack.Screen name="eliminar-cuenta" options={{ presentation: 'modal' }} />
       </Stack.Protected>
     </Stack>

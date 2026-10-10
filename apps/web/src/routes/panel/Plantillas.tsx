@@ -9,6 +9,7 @@ import { useTemplates } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 
 const CATEGORIAS = Object.keys(t.categorias) as FoodCategory[];
+const DIETAS = Object.entries(t.oferta.dietas);
 const DIAS = t.panel.plantillas.diasSemana;
 
 interface FormState {
@@ -23,6 +24,7 @@ interface FormState {
   start: string;
   end: string;
   active: boolean;
+  dietary_tags: string[];
 }
 
 const empty = (category: FoodCategory): FormState => ({
@@ -36,6 +38,7 @@ const empty = (category: FoodCategory): FormState => ({
   start: '17:00',
   end: '18:00',
   active: true,
+  dietary_tags: [],
 });
 
 export function Plantillas() {
@@ -66,6 +69,7 @@ export function Plantillas() {
         pickup_start_local: f.start,
         pickup_end_local: f.end,
         active: f.active,
+        dietary_tags: f.dietary_tags,
       };
       const { error: err } = f.id
         ? await supabase.from('offer_templates').update(row).eq('id', f.id)
@@ -115,6 +119,7 @@ export function Plantillas() {
       start: tpl.pickup_start_local.slice(0, 5),
       end: tpl.pickup_end_local.slice(0, 5),
       active: tpl.active,
+      dietary_tags: tpl.dietary_tags,
     });
 
   const submit = (e: FormEvent) => {
@@ -211,6 +216,31 @@ export function Plantillas() {
                 onChange={(e) => setForm({ ...form, end: e.target.value })}
               />
             </Field>
+          </div>
+          <p className="muted small" style={{ fontWeight: 600 }}>
+            {t.panel.publicar.dietas}
+          </p>
+          <div className="days mb">
+            {DIETAS.map(([key, label]) => {
+              const on = form.dietary_tags.includes(key);
+              return (
+                <label key={key} className={on ? 'on' : ''}>
+                  <input
+                    type="checkbox"
+                    checked={on}
+                    onChange={() =>
+                      setForm({
+                        ...form,
+                        dietary_tags: on
+                          ? form.dietary_tags.filter((x) => x !== key)
+                          : [...form.dietary_tags, key],
+                      })
+                    }
+                  />
+                  {label}
+                </label>
+              );
+            })}
           </div>
           <p className="muted small" style={{ fontWeight: 600 }}>
             {t.panel.plantillas.dias}

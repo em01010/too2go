@@ -1,8 +1,9 @@
 import { discountPercent, formatFranja, formatLempiras, t } from '@too2go/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 
+import { FavoriteButton } from '@/components/FavoriteButton';
 import { QuantityStepper } from '@/components/QuantityStepper';
 import {
   Body,
@@ -91,9 +92,45 @@ export default function Oferta() {
         </View>
       }
     >
-      <BackButton />
-      <Muted>{o.merchant_name}</Muted>
+      <Row>
+        <View style={styles.flex}>
+          <BackButton />
+        </View>
+        <Pressable
+          onPress={() =>
+            void Share.share({
+              message: t.oferta.compartirTexto(
+                o.title ?? '',
+                o.merchant_name ?? '',
+                formatLempiras(price),
+              ),
+            })
+          }
+          style={styles.shareBtn}
+        >
+          <Text style={styles.link}>{t.oferta.compartir}</Text>
+        </Pressable>
+        <FavoriteButton merchantId={o.merchant_id ?? ''} />
+      </Row>
+      <Pressable
+        onPress={() =>
+          router.push({ pathname: '/comercio/[id]', params: { id: o.merchant_id ?? '' } })
+        }
+      >
+        <Muted>
+          {o.merchant_name} · {t.oferta.verComercio} →
+        </Muted>
+      </Pressable>
       <Title>{o.title}</Title>
+      {(o.dietary_tags ?? []).length > 0 ? (
+        <Row style={styles.tags}>
+          {(o.dietary_tags ?? []).map((d) => (
+            <Pill key={d} tone="success">
+              {t.oferta.dietas[d] ?? d}
+            </Pill>
+          ))}
+        </Row>
+      ) : null}
       <Row style={styles.priceRow}>
         <Text style={styles.price}>{formatLempiras(price)}</Text>
         <Text style={styles.original}>{formatLempiras(original)}</Text>
@@ -118,6 +155,13 @@ export default function Oferta() {
         <Pressable onPress={openMaps} style={styles.mapsLink}>
           <Text style={styles.link}>{t.oferta.comoLlegar} →</Text>
         </Pressable>
+        {o.pickup_instructions ? (
+          <>
+            <Divider />
+            <Label>{t.oferta.instruccionesRecogida}</Label>
+            <Body>{o.pickup_instructions}</Body>
+          </>
+        ) : null}
       </Card>
 
       <Card style={styles.block}>
@@ -164,6 +208,8 @@ const styles = StyleSheet.create({
   back: { paddingVertical: spacing.sm, marginBottom: spacing.xs },
   link: { color: colors.primary, fontWeight: '600', fontSize: 16 },
   priceRow: { marginTop: spacing.sm, marginBottom: spacing.md },
+  tags: { flexWrap: 'wrap', marginTop: spacing.xs },
+  shareBtn: { paddingHorizontal: spacing.sm },
   price: { fontSize: 28, fontWeight: '700', color: colors.accent },
   original: { fontSize: 16, color: colors.textMuted, textDecorationLine: 'line-through' },
   block: { marginBottom: spacing.md },

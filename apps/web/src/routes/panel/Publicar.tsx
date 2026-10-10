@@ -11,6 +11,7 @@ import { useTemplates } from '@/lib/queries';
 import { supabase } from '@/lib/supabase';
 
 const CATEGORIAS = Object.keys(t.categorias) as FoodCategory[];
+const DIETAS = Object.entries(t.oferta.dietas);
 
 export function Publicar() {
   const { merchant } = useAuth();
@@ -28,6 +29,7 @@ export function Publicar() {
     date: hoyHN(),
     start: '17:00',
     end: '18:00',
+    dietary_tags: [] as string[],
   });
   const [error, setError] = useState('');
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
@@ -44,6 +46,7 @@ export function Publicar() {
       quantity_total: String(tpl.quantity),
       start: tpl.pickup_start_local.slice(0, 5),
       end: tpl.pickup_end_local.slice(0, 5),
+      dietary_tags: tpl.dietary_tags,
     }));
   };
 
@@ -69,6 +72,7 @@ export function Publicar() {
         quantity_total: qty,
         pickup_start: start,
         pickup_end: end,
+        dietary_tags: form.dietary_tags,
       });
       if (err) throw err;
     },
@@ -123,6 +127,31 @@ export function Publicar() {
         <Field label={t.panel.publicar.descripcion}>
           <textarea value={form.description} onChange={set('description')} />
         </Field>
+        <p className="muted small" style={{ fontWeight: 600 }}>
+          {t.panel.publicar.dietas}
+        </p>
+        <div className="days mb">
+          {DIETAS.map(([key, label]) => {
+            const on = form.dietary_tags.includes(key);
+            return (
+              <label key={key} className={on ? 'on' : ''}>
+                <input
+                  type="checkbox"
+                  checked={on}
+                  onChange={() =>
+                    setForm((f) => ({
+                      ...f,
+                      dietary_tags: on
+                        ? f.dietary_tags.filter((x) => x !== key)
+                        : [...f.dietary_tags, key],
+                    }))
+                  }
+                />
+                {label}
+              </label>
+            );
+          })}
+        </div>
         <Field label={t.panel.publicar.alergenos}>
           <input
             value={form.allergens_note}

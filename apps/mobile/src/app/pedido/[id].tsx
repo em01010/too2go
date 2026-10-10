@@ -11,10 +11,12 @@ import {
   Text,
   TextInput,
   View,
+  Share,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 import { BackButton } from '@/app/oferta/[id]';
+import { MultiChips } from '@/components/Chips';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
   Body,
@@ -33,11 +35,18 @@ import {
 } from '@/components/ui';
 import { colors, radius, spacing } from '@/constants/theme';
 import { env } from '@/lib/env';
-import { useCancelOrder, useOrder, useSubmitReview, type OrderSummary } from '@/lib/queries';
+import {
+  useCancelOrder,
+  useMerchant,
+  useOrder,
+  useSubmitReview,
+  type OrderSummary,
+} from '@/lib/queries';
 
 export default function Pedido() {
   const { id } = useLocalSearchParams<{ id: string; pago?: string }>();
   const order = useOrder(id, { poll: false });
+  const merchant = useMerchant(order.data?.merchant_id);
   const cancel = useCancelOrder();
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
@@ -138,6 +147,13 @@ export default function Pedido() {
         <Pressable onPress={openMaps} style={styles.mapsLink}>
           <Text style={styles.link}>{t.oferta.comoLlegar} →</Text>
         </Pressable>
+        {merchant.data?.pickup_instructions ? (
+          <>
+            <Divider />
+            <Label>{t.oferta.instruccionesRecogida}</Label>
+            <Body>{merchant.data.pickup_instructions}</Body>
+          </>
+        ) : null}
         <Divider />
         <Row style={styles.line}>
           <Body>{t.pedido.cantidad}</Body>
@@ -158,6 +174,33 @@ export default function Pedido() {
 
       <ErrorText>{error}</ErrorText>
       <View style={styles.actions}>
+        {o.status === 'paid' ? (
+          <Button
+            title={t.pedido.pedirAmigo}
+            variant="secondary"
+            onPress={() =>
+              void Share.share({
+                message: t.pedido.pedirAmigoTexto(
+                  o.merchant_name,
+                  formatFranja(o.pickup_start, o.pickup_end),
+                  o.pickup_code,
+                  o.merchant_address,
+                ),
+              })
+            }
+          />
+        ) : null}
+        {o.merchant_whatsapp ? (
+          <Button
+            title={t.pedido.escribirComercio}
+            variant="ghost"
+            onPress={() =>
+              void Linking.openURL(
+                `https://wa.me/${(o.merchant_whatsapp ?? '').replace(/\D/g, '')}`,
+              )
+            }
+          />
+        ) : null}
         {canCancel ? (
           <Button
             title={t.pedido.cancelar}
@@ -186,6 +229,9 @@ function ReviewForm({ order }: { order: OrderSummary }) {
   const submit = useSubmitReview();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const toggleTag = (k: string) =>
+    setTags((prev) => (prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]));
   return (
     <Card style={styles.block}>
       <Label>{t.pedido.dejarResena}</Label>
@@ -197,6 +243,14 @@ function ReviewForm({ order }: { order: OrderSummary }) {
           </Pressable>
         ))}
       </Row>
+      <Label>{t.pedido.resenaQueDestacas}</Label>
+      <View style={styles.tagsWrap}>
+        <MultiChips
+          options={Object.entries(t.pedido.resenaTags).map(([key, label]) => ({ key, label }))}
+          values={tags}
+          onToggle={toggleTag}
+        />
+      </View>
       <TextInput
         placeholder={t.pedido.resenaComentario}
         placeholderTextColor={colors.textMuted}
@@ -210,7 +264,7 @@ function ReviewForm({ order }: { order: OrderSummary }) {
         disabled={rating === 0}
         loading={submit.isPending}
         onPress={() =>
-          submit.mutate({ orderId: order.id, merchantId: order.merchant_id, rating, comment })
+          submit.mutate({ orderId: order.id, merchantId: order.merchant_id, rating, comment, tags })
         }
       />
       {submit.isError ? <ErrorText>{t.comun.errorGenerico}</ErrorText> : null}
@@ -242,6 +296,7 @@ const styles = StyleSheet.create({
   line: { justifyContent: 'space-between' },
   total: { color: colors.accent },
   stars: { marginVertical: spacing.sm, gap: 4 },
+  tagsWrap: { marginHorizontal: -spacing.md, marginBottom: spacing.sm },
   star: { fontSize: 34, color: colors.border },
   starOn: { color: colors.accent },
   comment: {
