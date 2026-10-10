@@ -21,7 +21,8 @@ export type Merchant = Tables<'merchants'>;
 export type MerchantMember = Tables<'merchant_members'>;
 export type Offer = Tables<'offers'>;
 export type OfferTemplate = Tables<'offer_templates'>;
-export type Order = Tables<'orders'>;
+// PostgREST expone `_release_inventory(orders)` como "columna calculada"; no es parte de la fila real.
+export type Order = Omit<Tables<'orders'>, '_release_inventory'>;
 export type OrderEvent = Tables<'order_events'>;
 export type Review = Tables<'reviews'>;
 export type Payout = Tables<'payouts'>;

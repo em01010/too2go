@@ -317,6 +317,13 @@ export type Database = {
             foreignKeyName: 'order_events_order_id_fkey';
             columns: ['order_id'];
             isOneToOne: false;
+            referencedRelation: 'order_summaries';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'order_events_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: false;
             referencedRelation: 'orders';
             referencedColumns: ['id'];
           },
@@ -598,6 +605,13 @@ export type Database = {
             foreignKeyName: 'reviews_order_id_fkey';
             columns: ['order_id'];
             isOneToOne: true;
+            referencedRelation: 'order_summaries';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reviews_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: true;
             referencedRelation: 'orders';
             referencedColumns: ['id'];
           },
@@ -636,6 +650,87 @@ export type Database = {
             columns: ['merchant_id'];
             isOneToOne: false;
             referencedRelation: 'merchants';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      order_summaries: {
+        Row: {
+          cancel_reason: string | null;
+          cancelled_at: string | null;
+          category: Database['public']['Enums']['food_category'] | null;
+          commission_hnl: number | null;
+          created_at: string | null;
+          customer_id: string | null;
+          customer_name: string | null;
+          customer_phone: string | null;
+          has_review: boolean | null;
+          id: string | null;
+          merchant_address: string | null;
+          merchant_cover_url: string | null;
+          merchant_id: string | null;
+          merchant_lat: number | null;
+          merchant_lng: number | null;
+          merchant_logo_url: string | null;
+          merchant_name: string | null;
+          merchant_net_hnl: number | null;
+          merchant_whatsapp: string | null;
+          merchant_zone: string | null;
+          offer_id: string | null;
+          offer_status: Database['public']['Enums']['offer_status'] | null;
+          offer_title: string | null;
+          original_value_hnl: number | null;
+          paid_at: string | null;
+          payment_provider: string | null;
+          payment_ref: string | null;
+          payout_id: string | null;
+          picked_up_at: string | null;
+          pickup_code: string | null;
+          pickup_end: string | null;
+          pickup_start: string | null;
+          quantity: number | null;
+          reservation_expires_at: string | null;
+          saved_hnl: number | null;
+          status: Database['public']['Enums']['order_status'] | null;
+          total_hnl: number | null;
+          unit_price_hnl: number | null;
+          updated_at: string | null;
+        };
+        ComputedFields: never;
+        Relationships: [
+          {
+            foreignKeyName: 'orders_customer_id_fkey';
+            columns: ['customer_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'orders_merchant_id_fkey';
+            columns: ['merchant_id'];
+            isOneToOne: false;
+            referencedRelation: 'merchants';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'orders_offer_id_fkey';
+            columns: ['offer_id'];
+            isOneToOne: false;
+            referencedRelation: 'offer_feed';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'orders_offer_id_fkey';
+            columns: ['offer_id'];
+            isOneToOne: false;
+            referencedRelation: 'offers';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'orders_payout_fk';
+            columns: ['payout_id'];
+            isOneToOne: false;
+            referencedRelation: 'payouts';
             referencedColumns: ['id'];
           },
         ];

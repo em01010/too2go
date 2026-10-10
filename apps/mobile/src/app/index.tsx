@@ -1,27 +1,23 @@
-import { esHN, formatLempiras } from '@too2go/shared';
-import { StyleSheet, Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
+import { useEffect, useState } from 'react';
 
-import { colors, spacing } from '@/constants/theme';
+import { Loading } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
+import { hasSeenOnboarding } from '@/lib/storage';
 
+/** Punto de entrada: decide entre onboarding, login o la app. */
 export default function Index() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{esHN.app.nombre}</Text>
-      <Text style={styles.subtitle}>{esHN.app.eslogan}</Text>
-      <Text style={styles.price}>{formatLempiras(90)}</Text>
-    </View>
-  );
-}
+  const { session, profile } = useAuth();
+  const [seen, setSeen] = useState<boolean | null>(null);
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-    backgroundColor: colors.background,
-  },
-  title: { fontSize: 32, fontWeight: '700', color: colors.primary },
-  subtitle: { marginTop: spacing.sm, fontSize: 16, color: colors.textMuted, textAlign: 'center' },
-  price: { marginTop: spacing.lg, fontSize: 24, fontWeight: '600', color: colors.accent },
-});
+  useEffect(() => {
+    void hasSeenOnboarding().then(setSeen);
+  }, []);
+
+  if (session) {
+    if (profile && !profile.full_name) return <Redirect href="/nombre" />;
+    return <Redirect href="/(tabs)" />;
+  }
+  if (seen === null) return <Loading />;
+  return <Redirect href={seen ? '/login' : '/onboarding'} />;
+}
