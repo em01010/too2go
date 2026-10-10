@@ -6,4 +6,3 @@ build
 pnpm-lock.yaml
 supabase/.temp
 supabase/.branches
-packages/shared/src/types/database.ts
