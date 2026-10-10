@@ -1,0 +1,20 @@
+{
+  "name": "@too2go/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tipos, textos (es-HN) y utilidades compartidas entre la app móvil, el panel web y las edge functions",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./i18n": "./src/i18n/es-HN.ts",
+    "./types": "./src/types/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  }
+}
