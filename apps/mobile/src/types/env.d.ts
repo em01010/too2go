@@ -4,5 +4,6 @@ declare namespace NodeJS {
     EXPO_PUBLIC_SUPABASE_ANON_KEY?: string;
     EXPO_PUBLIC_GOOGLE_MAPS_KEY?: string;
     EXPO_PUBLIC_SUPPORT_WHATSAPP?: string;
+    EXPO_PUBLIC_PANEL_URL?: string;
   }
 }

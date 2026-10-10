@@ -65,6 +65,7 @@ export const esHN = {
     codigoSubtitulo: (phone: string) => `Lo mandamos al ${phone}.`,
     codigoPlaceholder: '123456',
     codigoInvalido: 'Ese código no es válido o ya venció.',
+    esperaReintento: 'Acabás de pedir un código. Esperá unos segundos y volvé a intentar.',
     verificar: 'Verificar',
     reenviar: 'Reenviar código',
     cambiarNumero: 'Cambiar número',
@@ -193,6 +194,7 @@ export const esHN = {
     nombre: 'Nombre',
     telefono: 'Teléfono',
     soporte: 'Soporte por WhatsApp',
+    quieroVender: '¿Tenés un comercio? Vendé en Too2Go',
     terminos: 'Términos y privacidad',
     cerrarSesion: 'Cerrar sesión',
     eliminarCuenta: 'Eliminar mi cuenta',
@@ -229,6 +231,46 @@ export const esHN = {
     login: {
       titulo: 'Ingresá al panel',
       subtitulo: 'Usá el celular registrado para tu comercio.',
+      quieroVender: 'Quiero vender en Too2Go',
+      yaTengoCuenta: 'Ya tengo un comercio registrado',
+    },
+    registro: {
+      titulo: 'Registrá tu comercio',
+      subtitulo:
+        'Ingresá con tu celular, contanos de tu negocio y lo revisamos. Te avisamos por WhatsApp cuando esté aprobado.',
+      pasos: [
+        'Ingresá con tu número de celular',
+        'Completá los datos de tu comercio',
+        'Te aprobamos y empezás a publicar bolsas',
+      ],
+      formTitulo: 'Datos de tu comercio',
+      nombre: 'Nombre del comercio',
+      categoria: 'Tipo de comercio',
+      direccion: 'Dirección (como la buscaría un cliente)',
+      zona: 'Colonia o zona',
+      whatsapp: 'WhatsApp del comercio',
+      descripcion: '¿Qué vendés? (opcional)',
+      estacionamiento: 'Tiene estacionamiento',
+      ubicacion: 'Ubicación en el mapa',
+      ubicacionAyuda:
+        'Si estás en el local, tocá "Usar mi ubicación". Si no, buscá tu negocio en Google Maps, mantené presionado sobre el pin y copiá las coordenadas.',
+      usarMiUbicacion: 'Usar mi ubicación',
+      ubicacionObtenida: 'Ubicación detectada.',
+      ubicacionError: 'No pudimos obtener tu ubicación. Ingresá las coordenadas a mano.',
+      lat: 'Latitud',
+      lng: 'Longitud',
+      enviar: 'Enviar solicitud',
+      enviando: 'Enviando…',
+      errores: {
+        invalid_name: 'Ingresá el nombre del comercio (mínimo 3 letras).',
+        invalid_address: 'Ingresá una dirección más completa.',
+        invalid_location: 'Las coordenadas no parecen estar en Honduras.',
+        already_member: 'Tu cuenta ya está asociada a un comercio.',
+      } as Record<string, string>,
+      pendienteTitulo: '¡Solicitud enviada!',
+      pendienteTexto: (name: string) =>
+        `Estamos revisando ${name}. Cuando esté aprobado vas a poder publicar bolsas desde este panel. Te avisamos por WhatsApp.`,
+      pendienteSoporte: '¿Dudas? Escribinos por WhatsApp',
     },
     hoy: {
       titulo: 'Hoy',
@@ -392,6 +434,8 @@ export const esHN = {
         active: 'Activo',
         suspended: 'Suspendido',
       } as Record<string, string>,
+      pendientes: (n: number) =>
+        n === 1 ? '1 solicitud pendiente' : `${n} solicitudes pendientes`,
       campos: {
         name: 'Nombre comercial',
         legal_name: 'Razón social',

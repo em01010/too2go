@@ -54,9 +54,14 @@ export function AdminComercios() {
     create.mutate();
   };
 
+  const pendientes = (merchants.data ?? []).filter((m) => m.status === 'pending').length;
+  const orden = { pending: 0, active: 1, suspended: 2 } as const;
+  const lista = [...(merchants.data ?? [])].sort((a, b) => orden[a.status] - orden[b.status]);
+
   return (
     <Page
       title={t.admin.comercios.titulo}
+      subtitle={pendientes > 0 ? t.admin.comercios.pendientes(pendientes) : undefined}
       actions={
         <button className="btn" onClick={() => setCreating((c) => !c)}>
           {t.admin.comercios.nuevo}
@@ -160,7 +165,7 @@ export function AdminComercios() {
             </tr>
           </thead>
           <tbody>
-            {(merchants.data ?? []).map((m) => (
+            {lista.map((m) => (
               <tr key={m.id}>
                 <td>
                   <strong>{m.name}</strong>

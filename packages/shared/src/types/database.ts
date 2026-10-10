@@ -854,6 +854,47 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      register_merchant: {
+        Args: {
+          p_address: string;
+          p_category: Database['public']['Enums']['food_category'];
+          p_description?: string;
+          p_has_parking?: boolean;
+          p_lat?: number;
+          p_lng?: number;
+          p_name: string;
+          p_whatsapp?: string;
+          p_zone?: string;
+        };
+        Returns: {
+          address: string;
+          category: Database['public']['Enums']['food_category'];
+          city: string;
+          commission_rate: number;
+          cover_url: string | null;
+          created_at: string;
+          description: string | null;
+          donation_opt_in: boolean;
+          has_parking: boolean;
+          id: string;
+          lat: number;
+          legal_name: string | null;
+          lng: number;
+          logo_url: string | null;
+          name: string;
+          rtn: string | null;
+          status: Database['public']['Enums']['merchant_status'];
+          updated_at: string;
+          whatsapp: string | null;
+          zone: string | null;
+        };
+        SetofOptions: {
+          from: '*';
+          to: 'merchants';
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       reserve_order: {
         Args: { p_offer: string; p_quantity?: number };
         Returns: {

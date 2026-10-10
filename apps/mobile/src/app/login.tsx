@@ -31,8 +31,11 @@ export default function Login() {
       await sendOtp(e164);
       setPhone(e164);
       setStep('code');
-    } catch {
-      setError(t.comun.errorGenerico);
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? '';
+      setError(
+        code === 'over_sms_send_rate_limit' ? t.login.esperaReintento : t.comun.errorGenerico,
+      );
     } finally {
       setBusy(false);
     }

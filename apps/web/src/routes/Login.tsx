@@ -13,6 +13,7 @@ export function Login() {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [vender, setVender] = useState(false);
   const isLocal = /localhost|127\.0\.0\.1|192\.168\./.test(env.supabaseUrl);
 
   const send = async (e: FormEvent) => {
@@ -25,8 +26,11 @@ export function Login() {
       await sendOtp(e164);
       setPhone(e164);
       setStep('code');
-    } catch {
-      setError(t.comun.errorGenerico);
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? '';
+      setError(
+        code === 'over_sms_send_rate_limit' ? t.login.esperaReintento : t.comun.errorGenerico,
+      );
     } finally {
       setBusy(false);
     }
@@ -51,10 +55,21 @@ export function Login() {
         {t.app.nombre}
       </div>
       <div className="card">
-        <h1>{t.panel.login.titulo}</h1>
+        <h1>{vender ? t.panel.registro.titulo : t.panel.login.titulo}</h1>
         <p className="muted">
-          {step === 'phone' ? t.panel.login.subtitulo : t.login.codigoSubtitulo(phone)}
+          {step !== 'phone'
+            ? t.login.codigoSubtitulo(phone)
+            : vender
+              ? t.panel.registro.subtitulo
+              : t.panel.login.subtitulo}
         </p>
+        {vender && step === 'phone' ? (
+          <ol className="muted small" style={{ paddingLeft: 18, marginBottom: 16 }}>
+            {t.panel.registro.pasos.map((p) => (
+              <li key={p}>{p}</li>
+            ))}
+          </ol>
+        ) : null}
         {step === 'phone' ? (
           <form onSubmit={(e) => void send(e)}>
             <Field label={t.login.telefono}>
@@ -71,6 +86,14 @@ export function Login() {
               {t.login.enviarCodigo}
             </button>
             {isLocal ? <p className="muted small mt">{t.login.localHint}</p> : null}
+            <button
+              type="button"
+              className="btn ghost mt"
+              style={{ width: '100%' }}
+              onClick={() => setVender((v) => !v)}
+            >
+              {vender ? t.panel.login.yaTengoCuenta : t.panel.login.quieroVender}
+            </button>
           </form>
         ) : (
           <form onSubmit={(e) => void verify(e)}>

@@ -84,6 +84,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       },
       async signOut() {
         await supabase.auth.signOut();
+        // Volver al inicio para que la próxima persona no herede la URL de la sesión anterior.
+        window.history.replaceState(null, '', '/');
       },
       async reload() {
         if (session) await load(session.user.id);

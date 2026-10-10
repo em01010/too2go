@@ -14,4 +14,6 @@ export const env = {
   ),
   googleMapsKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_KEY ?? '',
   supportWhatsapp: process.env.EXPO_PUBLIC_SUPPORT_WHATSAPP ?? '',
+  /** URL pública del panel web (para el enlace "Vendé en Too2Go"). Opcional. */
+  panelUrl: process.env.EXPO_PUBLIC_PANEL_URL ?? '',
 };

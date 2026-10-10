@@ -13,6 +13,8 @@ import { AdminMetricas } from '@/routes/admin/Metricas';
 import { AdminPedidos } from '@/routes/admin/Pedidos';
 import { AdminResenas } from '@/routes/admin/Resenas';
 import { Login } from '@/routes/Login';
+import { RegistroComercio } from '@/routes/RegistroComercio';
+import { Pendiente } from '@/routes/panel/Pendiente';
 import { Cierre } from '@/routes/panel/Cierre';
 import { Hoy } from '@/routes/panel/Hoy';
 import { Plantillas } from '@/routes/panel/Plantillas';
@@ -65,6 +67,11 @@ function Router() {
 
   const home = isAdmin ? '/admin' : '/panel/hoy';
 
+  // Sin comercio y sin rol admin: la única pantalla es el registro del comercio.
+  if (!isAdmin && merchants.length === 0) return <RegistroComercio />;
+  // Comercio registrado pero todavía no aprobado.
+  if (!isAdmin && merchants.every((m) => m.status === 'pending')) return <Pendiente />;
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to={home} replace />} />
@@ -73,7 +80,7 @@ function Router() {
         <Route
           path="/panel/hoy"
           element={
-            <Guard ok={merchants.length > 0 || isAdmin}>
+            <Guard ok={merchants.length > 0 || isAdmin} to="/admin">
               <Hoy />
             </Guard>
           }
@@ -81,7 +88,7 @@ function Router() {
         <Route
           path="/panel/validar"
           element={
-            <Guard ok={merchants.length > 0}>
+            <Guard ok={merchants.length > 0} to="/admin">
               <Validar />
             </Guard>
           }
@@ -89,7 +96,7 @@ function Router() {
         <Route
           path="/panel/publicar"
           element={
-            <Guard ok={merchants.length > 0}>
+            <Guard ok={merchants.length > 0} to="/admin">
               <Publicar />
             </Guard>
           }
@@ -97,7 +104,7 @@ function Router() {
         <Route
           path="/panel/plantillas"
           element={
-            <Guard ok={merchants.length > 0}>
+            <Guard ok={merchants.length > 0} to="/admin">
               <Plantillas />
             </Guard>
           }
@@ -105,7 +112,7 @@ function Router() {
         <Route
           path="/panel/cierre"
           element={
-            <Guard ok={merchants.length > 0}>
+            <Guard ok={merchants.length > 0} to="/admin">
               <Cierre />
             </Guard>
           }
@@ -113,7 +120,7 @@ function Router() {
         <Route
           path="/panel/ventas"
           element={
-            <Guard ok={merchants.length > 0}>
+            <Guard ok={merchants.length > 0} to="/admin">
               <Ventas />
             </Guard>
           }
@@ -123,7 +130,7 @@ function Router() {
         <Route
           path="/admin"
           element={
-            <Guard ok={isAdmin} msg={t.admin.soloAdmin}>
+            <Guard ok={isAdmin} to="/panel/hoy">
               <AdminMetricas />
             </Guard>
           }
@@ -131,7 +138,7 @@ function Router() {
         <Route
           path="/admin/comercios"
           element={
-            <Guard ok={isAdmin} msg={t.admin.soloAdmin}>
+            <Guard ok={isAdmin} to="/panel/hoy">
               <AdminComercios />
             </Guard>
           }
@@ -139,7 +146,7 @@ function Router() {
         <Route
           path="/admin/comercios/:id"
           element={
-            <Guard ok={isAdmin} msg={t.admin.soloAdmin}>
+            <Guard ok={isAdmin} to="/panel/hoy">
               <AdminComercioDetalle />
             </Guard>
           }
@@ -147,7 +154,7 @@ function Router() {
         <Route
           path="/admin/pedidos"
           element={
-            <Guard ok={isAdmin} msg={t.admin.soloAdmin}>
+            <Guard ok={isAdmin} to="/panel/hoy">
               <AdminPedidos />
             </Guard>
           }
@@ -155,7 +162,7 @@ function Router() {
         <Route
           path="/admin/resenas"
           element={
-            <Guard ok={isAdmin} msg={t.admin.soloAdmin}>
+            <Guard ok={isAdmin} to="/panel/hoy">
               <AdminResenas />
             </Guard>
           }
@@ -163,7 +170,7 @@ function Router() {
         <Route
           path="/admin/liquidaciones"
           element={
-            <Guard ok={isAdmin} msg={t.admin.soloAdmin}>
+            <Guard ok={isAdmin} to="/panel/hoy">
               <AdminLiquidaciones />
             </Guard>
           }
@@ -174,11 +181,8 @@ function Router() {
   );
 }
 
-function Guard({ ok, msg, children }: { ok: boolean; msg?: string; children: ReactNode }) {
+/** Si el usuario no tiene el rol para esta sección, lo manda a su pantalla de inicio. */
+function Guard({ ok, to, children }: { ok: boolean; to: string; children: ReactNode }) {
   if (ok) return children;
-  return (
-    <div className="card">
-      <p>{msg ?? t.panel.sinComercio}</p>
-    </div>
-  );
+  return <Navigate to={to} replace />;
 }

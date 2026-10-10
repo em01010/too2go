@@ -72,6 +72,13 @@ export default function Perfil() {
             onPress={() => void Linking.openURL(`https://wa.me/${whatsapp}`)}
           />
         ) : null}
+        {env.panelUrl ? (
+          <Button
+            title={t.perfil.quieroVender}
+            variant="ghost"
+            onPress={() => void Linking.openURL(env.panelUrl)}
+          />
+        ) : null}
         <Button title={t.perfil.cerrarSesion} variant="ghost" onPress={confirmSignOut} />
         <Link href="/eliminar-cuenta" asChild>
           <Pressable style={styles.deleteBtn}>
