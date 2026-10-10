@@ -59,6 +59,9 @@ ANON=$(echo "$STATUS" | sed -n 's/^ANON_KEY="\(.*\)"/\1/p')
 if [ "$RESET" = 1 ]; then
   say "Aplicando migraciones y seed (ofertas para hoy, usuarios de prueba)"
   npx supabase db reset
+else
+  say "Aplicando migraciones pendientes (sin borrar datos)"
+  npx supabase migration up 2>&1 | tail -3 || true
 fi
 
 say "Escribiendo archivos .env"
