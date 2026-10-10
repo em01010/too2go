@@ -4,6 +4,8 @@ export type PaymentProviderName = 'mock';
 
 export interface CreatePaymentRequest {
   orderId: string;
+  /** URL a la que vuelve el cliente al terminar (deep link de la app). */
+  returnUrl?: string;
 }
 
 export interface CreatePaymentResponse {

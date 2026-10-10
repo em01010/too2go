@@ -380,6 +380,16 @@ authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
 allow_dynamic_registration = false
 
+# Funciones públicas: las llama la pasarela (webhook) o el navegador (checkout mock), sin JWT.
+[functions.payment-webhook]
+verify_jwt = false
+
+[functions.mock-checkout]
+verify_jwt = false
+
+[functions.create-payment]
+verify_jwt = true
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

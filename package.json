@@ -19,10 +19,14 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local --schema public > packages/shared/src/types/database.ts && prettier --write packages/shared/src/types/database.ts",
-    "functions:serve": "supabase functions serve --env-file supabase/functions/.env"
+    "functions:serve": "supabase functions serve --env-file supabase/functions/.env",
+    "functions:check": "cd supabase/functions && deno check create-payment/index.ts payment-webhook/index.ts mock-checkout/index.ts && deno lint && deno fmt --check",
+    "functions:fmt": "cd supabase/functions && deno fmt",
+    "smoke:payments": "./scripts/smoke-payments.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "deno": "^2.9.6",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.0",
     "eslint-plugin-react-hooks": "^7.0.0",
