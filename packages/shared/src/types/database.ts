@@ -746,6 +746,8 @@ export type Database = {
         };
         Returns: undefined;
       };
+      admin_generate_offers_from_templates: { Args: { p_date?: string }; Returns: number };
+      admin_generate_payouts: { Args: { p_end: string; p_start: string }; Returns: number };
       cancel_offer_by_merchant: { Args: { p_offer: string; p_reason: string }; Returns: number };
       cancel_order_by_customer: {
         Args: { p_order: string };
