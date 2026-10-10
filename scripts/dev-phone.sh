@@ -78,6 +78,9 @@ ENV
 echo "   apps/mobile/.env → $IP:54321"
 
 say "Edge functions (log: .dev-functions.log)"
+# Si quedó un contenedor de una corrida anterior, se elimina para que arranque limpio.
+PROJECT_ID=$(sed -n 's/^project_id = "\(.*\)"/\1/p' supabase/config.toml)
+docker rm -f "supabase_edge_runtime_${PROJECT_ID}" >/dev/null 2>&1 || true
 npx supabase functions serve --env-file supabase/functions/.env > .dev-functions.log 2>&1 &
 FUNCS=$!
 PIDS=("$FUNCS")
@@ -86,14 +89,27 @@ if [ "$WEB" = 1 ]; then
   pnpm --filter @too2go/web dev > .dev-web.log 2>&1 &
   PIDS+=("$!")
 fi
-cleanup() { kill "${PIDS[@]}" 2>/dev/null || true; }
+cleanup() {
+  kill "${PIDS[@]}" 2>/dev/null || true
+  docker rm -f "supabase_edge_runtime_${PROJECT_ID}" >/dev/null 2>&1 || true
+}
 trap cleanup EXIT INT TERM
 
-sleep 3
-if curl -sf -o /dev/null -X POST "http://127.0.0.1:54321/functions/v1/payment-webhook" -H 'Content-Type: application/json' -d '{}' 2>/dev/null || [ "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:54321/functions/v1/payment-webhook -H 'Content-Type: application/json' -d '{}')" = "401" ]; then
+# Esperar hasta 40 s a que las functions respondan (401 = el webhook rechazó la firma: está vivo).
+FUNCS_OK=0
+for _ in $(seq 1 20); do
+  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:54321/functions/v1/payment-webhook -H 'Content-Type: application/json' -d '{}' || true)
+  if [ "$code" = "401" ]; then FUNCS_OK=1; break; fi
+  if ! kill -0 "$FUNCS" 2>/dev/null; then break; fi
+  sleep 2
+done
+if [ "$FUNCS_OK" = 1 ]; then
   echo "   functions OK"
 else
-  echo "   (las functions todavía arrancan; mirá .dev-functions.log si el pago falla)"
+  printf '\033[1;31m   ✖ Las edge functions no respondieron. Sin ellas el pago no funciona.\033[0m\n'
+  echo "   Mirá .dev-functions.log. Si dice 'exit 137' o 'no longer available', Docker se quedó sin memoria:"
+  echo "   Docker Desktop → Settings → Resources → Memory a 6 GB o más y Resource Saver apagado → Apply & restart."
+  echo "   Luego, en otra terminal: pnpm functions:serve"
 fi
 
 cat <<TXT

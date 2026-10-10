@@ -112,6 +112,15 @@ Detecta la IP de tu computadora en la Wi‑Fi, levanta Supabase, aplica migracio
 escribe los `.env` de la app y del panel, deja las edge functions corriendo y arranca Metro con
 el QR para Expo Go. Requiere Docker Desktop abierto. En Windows corrélo desde Git Bash o WSL.
 
+Dos cosas que Expo y Docker exigen hoy:
+
+- **Cuenta de Expo.** Expo Go solo abre proyectos locales si la computadora y el teléfono usan
+  la misma cuenta (gratis en https://expo.dev/signup). En la computadora: `cd apps/mobile &&
+npx expo login`. En el teléfono: Expo Go → Profile → Log in.
+- **Memoria de Docker.** Supabase local necesita al menos 6 GB. Si las edge functions se caen
+  con `exit 137`, en Docker Desktop → Settings → Resources subí Memory y apagá Resource Saver.
+  Para levantarlas a mano en otra terminal: `pnpm functions:serve`.
+
 ### Paso a paso manual
 
 1. Averiguá la IP de tu computadora en la red Wi‑Fi (ej. `192.168.1.10`: `ipconfig` en Windows,
